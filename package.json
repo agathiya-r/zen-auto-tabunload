@@ -1,0 +1,10 @@
+{
+  "name": "zen-idle-unloader",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "node --check extension/background.js && node --check extension/policy.js && node --check extension/media-probe.js && node --check extension/experiments/zenTabs/api.js && node --check extension/options.js && node --check extension/popup.js",
+    "build": "python3 build.py"
+  }
+}

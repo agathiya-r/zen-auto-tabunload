@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "Zen Idle Unloader",
+  "version": "0.1.0",
+  "description": "Unload idle tabs without closing them. Protects Zen Essentials and playing media.",
+  "browser_specific_settings": {
+    "gecko": { "id": "zen-idle-unloader@local", "strict_min_version": "140.0" }
+  },
+  "permissions": ["tabs", "storage", "alarms", "<all_urls>"],
+  "incognito": "not_allowed",
+  "background": { "scripts": ["policy.js", "background.js"], "persistent": true },
+  "browser_action": {
+    "default_title": "Zen Idle Unloader",
+    "default_popup": "popup.html"
+  },
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "experiment_apis": {
+    "zenTabs": {
+      "schema": "experiments/zenTabs/schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "paths": [["zenTabs"]],
+        "script": "experiments/zenTabs/api.js"
+      }
+    }
+  }
+}

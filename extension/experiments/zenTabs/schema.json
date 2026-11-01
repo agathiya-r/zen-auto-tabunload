@@ -1,0 +1,21 @@
+[
+  {
+    "namespace": "zenTabs",
+    "functions": [
+      {
+        "name": "inspect", "type": "function", "async": true,
+        "parameters": [{ "name": "tabId", "type": "integer" }],
+        "returns": { "type": "object", "additionalProperties": { "type": "any" } }
+      },
+      {
+        "name": "discard", "type": "function", "async": true,
+        "parameters": [
+          { "name": "tabId", "type": "integer" },
+          { "name": "documentId", "type": "string" },
+          { "name": "lastAccessed", "type": "number" }
+        ],
+        "returns": { "type": "boolean" }
+      }
+    ]
+  }
+]
