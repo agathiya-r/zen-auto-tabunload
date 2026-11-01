@@ -5,6 +5,7 @@ A small Zen extension that unloads idle tabs **without closing them**.
 ## Behavior
 
 - Default timeout: **30 minutes**, configurable from 1 minute to 7 days.
+- Scans every Zen space and accessible non-private browser window using native `allStoredTabs`, including inactive spaces.
 - Checks once a minute. An eligible tab normally unloads within a minute after its timeout.
 - Ordinary tabs, bookmarked pages, and ordinary Zen pinned tabs are eligible.
 - **Zen Essentials are always excluded by their native `zen-essential` attribute.**
@@ -24,7 +25,7 @@ This is an **unsigned experimental extension**, tested on **Zen 1.24b / Gecko 15
 
 1. In Zen, open `about:config`, find `extensions.experiments.enabled`, and set it to `true`.
 2. Open `about:debugging#/runtime/this-firefox`.
-3. Click **Load Temporary Add-on…** and select `zen-idle-unloader-0.1.0.xpi`, or the extracted source's `extension/manifest.json`.
+3. Click **Load Temporary Add-on…** and select `zen-idle-unloader-0.1.1.xpi`, or the extracted source's `extension/manifest.json`.
 4. Open the extension's toolbar popup, then **Settings**, to choose your timeout.
 
 A temporary installation is removed when Zen exits. This extension does not alter browser preferences itself.
@@ -42,7 +43,7 @@ These preferences allow experimental and unsigned add-ons, which reduces the bro
 
 1. Set those preferences in `about:config`.
 2. Open `about:addons` → gear menu → **Install Add-on From File…**.
-3. Select `zen-idle-unloader-0.1.0.xpi` and accept its installation prompt.
+3. Select `zen-idle-unloader-0.1.1.xpi` and accept its installation prompt.
 4. Configure the timeout in the extension's options. The initial setting is 30 minutes.
 
 Persistent installation and activation after restart were verified in a separate test profile. Other Zen builds may restrict experiments or unsigned installs differently. This package is intended for Zen; ordinary Firefox windows fail the Zen safety check and are not unloaded.
@@ -69,7 +70,7 @@ npm run check
 npm run build
 ```
 
-`npm run build` uses Python 3's standard library and writes `dist/zen-idle-unloader-0.1.0.xpi` inside this project directory. No signing or publishing is performed.
+`npm run build` uses Python 3's standard library and writes `dist/zen-idle-unloader-0.1.1.xpi` inside this project directory. No signing or publishing is performed.
 
 Files:
 

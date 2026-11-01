@@ -38,18 +38,40 @@ function nativeHarness(prepare = async () => {}) {
   } };
   let discards = 0;
   const gb = { selectedTabs: [], prepareDiscardBrowser: prepare, discardBrowser: () => { discards++; return true; } };
-  const win = { gZenWorkspaces: {}, gBrowser: gb };
+  const win = { gZenWorkspaces: { allStoredTabs: [] }, gBrowser: gb };
   const tab = { documentGlobal: win, linkedBrowser: browser, isConnected: true, lastAccessed: 100, hasAttribute: name => attrs.has(name) };
+  const windows = [win];
+  const extension = {
+    tabManager: {
+      get: () => ({ nativeTab: tab }),
+      canAccessTab: native => !native.denied,
+      getWrapper: native => ({ convert: () => ({ id: native.testId }) }),
+    },
+    canAccessWindow: window => !window.denied,
+  };
   const context = vm.createContext({
     ExtensionAPI: class {},
+    Services: { wm: { getEnumerator: () => windows } },
     ChromeUtils: { importESModule: uri => uri.includes('PrivateBrowsingUtils')
-      ? { PrivateBrowsingUtils: { isWindowPrivate: () => false } }
+      ? { PrivateBrowsingUtils: { isWindowPrivate: window => Boolean(window.isPrivate) } }
       : { webrtcUI: { browserHasStreams: () => false } } },
   });
   vm.runInContext(code('experiments/zenTabs/api.js'), context);
-  const api = new context.zenTabs().getAPI({ extension: { tabManager: { get: () => ({ nativeTab: tab }) }, canAccessWindow: () => true } }).zenTabs;
-  return { api, tab, attrs, browser, gb, win, discards: () => discards };
+  const api = new context.zenTabs().getAPI({ extension }).zenTabs;
+  return { api, tab, attrs, browser, gb, win, windows, discards: () => discards };
 }
+test('native enumeration includes all stored spaces and windows, deduplicates, and respects access', async () => {
+  const h = nativeHarness();
+  const a = { testId: 1 }, b = { testId: 2 }, denied = { testId: 9, denied: true };
+  h.gb.tabs = [a];
+  h.win.gZenWorkspaces.allStoredTabs = [a, b, a, denied];
+  h.windows.push({ gZenWorkspaces: { allStoredTabs: [{ testId: 3 }] } });
+  h.windows.push({ gZenWorkspaces: { allStoredTabs: [{ testId: 4 }] }, isPrivate: true });
+  h.windows.push({ gZenWorkspaces: { allStoredTabs: [{ testId: 5 }] }, denied: true });
+  h.windows.push({ gZenWorkspaces: { allStoredTabs: [{ testId: 6 }] }, gBrowserInit: { isAdoptingTab: () => true } });
+  h.windows.push({ gBrowser: { tabs: [{ testId: 7 }] } });
+  assert.deepEqual(Array.from(await h.api.list(), tab => tab.id), [1, 2, 3]);
+});
 test('native bridge unloads eligible tabs but never closes them', async () => {
   const h = nativeHarness();
   assert.equal((await h.api.inspect(1)).reason, null);

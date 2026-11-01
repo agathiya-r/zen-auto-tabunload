@@ -27,7 +27,7 @@ const ready = (async () => {
   settings = IdlePolicy.settings((await browser.storage.local.get("settings")).settings);
   // A fresh full timeout after installation, browser restart or extension reload.
   // Tab IDs are deliberately never persisted across sessions.
-  for (const tab of await browser.tabs.query({})) {
+  for (const tab of await browser.zenTabs.list()) {
     touch(tab.id);
     if (tab.active) activeByWindow.set(tab.windowId, tab.id);
   }
@@ -41,7 +41,9 @@ async function sweep() {
   const initialRevision = revision;
   if (!settings.enabled) { skip("paused"); lastResult = result; return result; }
   if (!browser.zenTabs) throw new Error("Zen experimental API unavailable. See README installation steps.");
-  for (const candidate of await browser.tabs.query({})) {
+  // Zen's standard tabs.query() only enumerates the active space. Use its
+  // complete native collection, including inactive spaces in every window.
+  for (const candidate of await browser.zenTabs.list()) {
     if (!settings.enabled || initialRevision !== revision) break;
     try {
       // Fresh reads are required: the query is a snapshot and other tabs can change.

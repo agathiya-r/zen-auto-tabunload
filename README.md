@@ -6,12 +6,13 @@ The extension appears in Zen as **Zen Idle Unloader**.
 
 ## Download and install
 
-**[Download v0.1.0 (.xpi)](https://github.com/agathiya-r/zen-auto-tabunload/raw/refs/heads/main/dist/zen-idle-unloader-0.1.0.xpi)** · **[Installation guide](docs/INSTALLATION.md)**
+**[Download v0.1.1 (.xpi)](https://github.com/agathiya-r/zen-auto-tabunload/raw/refs/heads/main/dist/zen-idle-unloader-0.1.1.xpi)** · **[Installation guide](docs/INSTALLATION.md)**
 
 This is an **unsigned experimental extension**. Exact Essentials detection needs a privileged API that ordinary WebExtensions do not expose. Persistent installation requires enabling experimental add-ons and allowing unsigned add-ons; read the installation guide before installing. Tested on Zen 1.24b / Gecko 159 on macOS.
 
 ## Features
 
+- Check **all Zen spaces and browser windows**, including spaces you are not currently viewing.
 - Unload tabs after a configurable idle timeout: **30 minutes by default**, from 1 minute to 7 days.
 - Include ordinary tabs, bookmarked pages, and ordinary pinned tabs.
 - Keep **Essentials**, active tabs, and playing audio/video loaded, including **muted video**.
@@ -27,7 +28,7 @@ Unloading retains the tab and supported browser session state. Arbitrary JavaScr
 
 ## How it works
 
-The background script tracks tab activity and checks idle candidates. A transient page probe detects HTML audio/video in accessible frames and shadow roots, without continuously running scripts in every page. A small experimental API reads Zen's native Essentials and media state and uses the same session-preserving discard path as the browser's tab-discard API. It checks again after asynchronous preparation to reject newly protected tabs or a changed document.
+The background script tracks tab activity and checks idle candidates from Zen’s native `allStoredTabs` collection in every accessible non-private browser window. This includes inactive spaces; Zen’s standard `tabs.query()` can otherwise return only the current space. A transient page probe detects HTML audio/video in accessible frames and shadow roots, without continuously running scripts in every page. A small experimental API reads Zen's native Essentials and media state and uses the same session-preserving discard path as the browser's tab-discard API. It checks again after asynchronous preparation to reject newly protected tabs or a changed document.
 
 The extension never calls a tab-closing API. It also does not change Zen's own automatic memory-pressure unloading rules.
 
@@ -55,13 +56,13 @@ npm run check
 npm run build
 ```
 
-The reproducible build writes `dist/zen-idle-unloader-0.1.0.xpi`. Load `extension/manifest.json` through `about:debugging` while developing. See [development details](DEVELOPMENT.md), [verification results](TESTING.md), and [release notes](CHANGELOG.md).
+The reproducible build writes `dist/zen-idle-unloader-0.1.1.xpi`. Load `extension/manifest.json` through `about:debugging` while developing. See [development details](DEVELOPMENT.md), [verification results](TESTING.md), and [release notes](CHANGELOG.md).
 
 Future changes to this extension belong in this repository. Its [agent instructions](AGENTS.md) record the requirements and commit workflow.
 
 ## Compatibility and limitations
 
-Native Zen internals can change between browser versions; a failed check keeps the tab loaded. Media detection covers browser native state and accessible HTML media, with no claim of compatibility with every site or player. Calls, picture-in-picture, split views, and inactive workspaces have code guards or use the browser tab APIs but have not all been exhaustively tested live. See [test coverage](TESTING.md).
+Native Zen internals can change between browser versions; a failed check keeps the tab loaded. Media detection covers browser native state and accessible HTML media, with no claim of compatibility with every site or player. Inactive spaces were verified in a live three-space browser test. Multiple-window enumeration has automated coverage. Calls, picture-in-picture, and split views have code guards but have not all been exhaustively tested live. See [test coverage](TESTING.md).
 
 Actual RAM savings depend on the pages and browser processes. This extension unloads eligible pages; it does not impose a browser-wide memory limit.
 

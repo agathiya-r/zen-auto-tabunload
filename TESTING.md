@@ -4,7 +4,7 @@ Tested on November 1, 2026 using the installed Zen 1.24b application, Gecko 159,
 
 ## Automated checks
 
-`npm test`: **11 passing tests**.
+`npm test`: **13 passing tests**.
 
 - Timeout boundary and startup grace.
 - A tab active for a long time gets a full timeout after it is left.
@@ -16,6 +16,8 @@ Tested on November 1, 2026 using the installed Zen 1.24b application, Gecko 159,
 - Native guards are repeated after asynchronous session-state preparation: changing selection, Essentials status, media, document identity, or last access cancels the attempt.
 - Unknown native media state and unsupported browser windows are protected.
 - Muted playback and media nested in a shadow root are detected.
+- Inactive-space tabs omitted by Zen's standard query are still checked.
+- Native enumeration covers every accessible non-private window, deduplicates tabs, and respects window/tab access restrictions.
 
 `npm run check`: all six runtime JavaScript files pass syntax checks.
 
@@ -38,9 +40,17 @@ All eight test tabs remained open. Selecting the unloaded ordinary tab restored 
 
 The options page rendered successfully and was visually inspected. The packaged XPI installed in the test profile with experiments enabled and signature enforcement disabled, and was confirmed **active and non-temporary after a browser restart**. The isolated browser was shut down after testing.
 
+## Version 0.1.1: inactive spaces
+
+A separate live test reproduced the original issue in Zen 1.24b: `browser.tabs.query({})` returned only tabs from the current space, while Zen's native `allStoredTabs` also contained the inactive-space tabs.
+
+The updated packaged XPI was then tested with **three actual Zen spaces**. Space C stayed selected during a real one-minute timeout. Five idle tabs spread across spaces A, B, and C unloaded, including an ordinary pinned tab in A and the previously selected tab in B. A playing muted WebM video in inactive space B stayed loaded, and the native Essential stayed loaded. All seven test tabs retained the same IDs and remained open. The check did not switch the active space.
+
+This live test exercises the packaged native enumeration, cross-space tab lookup and media inspection, inactivity tracking, and real browser discard behavior together.
+
 ## Remaining coverage
 
-- Live calls, capture, picture-in-picture, split views, multiple windows, inactive Zen workspaces, and before-unload prompts have code guards but were not exhaustively exercised in live browser tests.
+- Live calls, capture, picture-in-picture, split views, multiple windows, and before-unload prompts have code guards but were not exhaustively exercised in live browser tests. Inactive spaces have the live coverage described above; multiple-window enumeration has automated coverage.
 - No site-wide compatibility claim is made for every player or live stream. Browser native state and accessible HTML media are checked; denied inspections leave the tab loaded.
 - Playback checks and discarding cross process boundaries. Native guards are repeated, but no browser extension can provide a transaction spanning arbitrary website code and the browser's process lifecycle.
 - RAM savings were not benchmarked. The live test verifies the browser's `discarded` state and restoration, not a particular RAM reduction.

@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Zen Idle Unloader",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Unload idle tabs without closing them. Protects Zen Essentials and playing media.",
   "browser_specific_settings": {
     "gecko": { "id": "zen-idle-unloader@local", "strict_min_version": "140.0" }

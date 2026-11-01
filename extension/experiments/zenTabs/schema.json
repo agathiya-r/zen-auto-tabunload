@@ -3,6 +3,14 @@
     "namespace": "zenTabs",
     "functions": [
       {
+        "name": "list", "type": "function", "async": true,
+        "parameters": [],
+        "returns": {
+          "type": "array",
+          "items": { "type": "object", "additionalProperties": { "type": "any" } }
+        }
+      },
+      {
         "name": "inspect", "type": "function", "async": true,
         "parameters": [{ "name": "tabId", "type": "integer" }],
         "returns": { "type": "object", "additionalProperties": { "type": "any" } }

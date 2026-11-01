@@ -26,7 +26,8 @@ function harness() {
     storage: { local: { async get() { return { settings: { enabled: true, idleMinutes: 1 } }; }, async set() {} } },
     alarms: { create() {}, onAlarm: event() },
     runtime: { id: 'test', getURL: p => 'moz-extension://test/' + p, onMessage: event() },
-    zenTabs: { async inspect(id) { return { reason: essential && id === 2 ? 'essential' : null, documentId: '1', lastAccessed: tabs.find(t => t.id === id).lastAccessed }; },
+    zenTabs: { async list() { return tabs.map(t => ({ ...t })); },
+      async inspect(id) { return { reason: essential && id === 2 ? 'essential' : null, documentId: '1', lastAccessed: tabs.find(t => t.id === id).lastAccessed }; },
       async discard(id) { discards.push(id); return true; } },
   };
   const ctx = vm.createContext({ browser, Date: class extends Date { static now() { return now; } }, console });
@@ -62,4 +63,14 @@ test('pausing from the settings page prevents unloading', async () => {
   const h = harness();await h.send({ type: 'status' });h.advance(60000);
   await h.send({ type: 'save', settings: { enabled: false, idleMinutes: 1 } });
   await h.send({ type: 'sweep' });assert.deepEqual(h.discards(), []);
+});
+test('inactive-space tabs omitted by standard query are still checked in every window', async () => {
+  const h = harness();
+  // Simulate Zen: standard query can see only the current space's active tab.
+  h.browser.tabs.query = async () => [{ ...h.tabs[0] }];
+  h.tabs.push({ id: 3, windowId: 1, active: false, hidden: true, status: 'complete', lastAccessed: 1000000 });
+  h.tabs.push({ id: 4, windowId: 2, active: false, hidden: true, status: 'complete', lastAccessed: 1000000 });
+  await h.send({ type: 'status' });h.advance(60000);
+  await h.send({ type: 'sweep' });
+  assert.deepEqual(h.discards(), [2, 3, 4]);
 });

@@ -1,4 +1,4 @@
-/* global ExtensionAPI, ChromeUtils */
+/* global ExtensionAPI, ChromeUtils, Services */
 // The bridge only reads native safety state and calls the same discard path as
 // Firefox's tabs.discard(). It never removes, moves, replaces, or hides a tab.
 var zenTabs = class extends ExtensionAPI {
@@ -36,6 +36,26 @@ var zenTabs = class extends ExtensionAPI {
 
     return {
       zenTabs: {
+        async list() {
+          const tabs = [];
+          const seen = new Set();
+          const manager = context.extension.tabManager;
+          for (const win of Services.wm.getEnumerator("navigator:browser")) {
+            if (!win.gZenWorkspaces || !context.extension.canAccessWindow(win) ||
+                PrivateBrowsingUtils.isWindowPrivate(win) || win.gBrowserInit?.isAdoptingTab()) continue;
+            // gBrowser.tabs is scoped to the active Zen space. allStoredTabs
+            // includes pinned tabs, Essentials and grouped tabs in every space.
+            for (const nativeTab of win.gZenWorkspaces.allStoredTabs || []) {
+              if (!manager.canAccessTab(nativeTab)) continue;
+              const tab = manager.getWrapper(nativeTab).convert();
+              if (!seen.has(tab.id)) {
+                seen.add(tab.id);
+                tabs.push(tab);
+              }
+            }
+          }
+          return tabs;
+        },
         async inspect(tabId) { return inspectNative(getTab(tabId)); },
         async discard(tabId, documentId, lastAccessed) {
           const tab = getTab(tabId);

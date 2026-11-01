@@ -1,6 +1,6 @@
 # Installation
 
-Download [Zen Idle Unloader v0.1.0](https://github.com/agathiya-r/zen-auto-tabunload/raw/refs/heads/main/dist/zen-idle-unloader-0.1.0.xpi), or build it from source with `npm run build`.
+Download [Zen Idle Unloader v0.1.1](https://github.com/agathiya-r/zen-auto-tabunload/raw/refs/heads/main/dist/zen-idle-unloader-0.1.1.xpi), or build it from source with `npm run build`.
 
 ## Keep it installed across browser restarts
 
@@ -17,7 +17,7 @@ Download [Zen Idle Unloader v0.1.0](https://github.com/agathiya-r/zen-auto-tabun
 5. Select the downloaded `.xpi` and accept the installation prompt.
 6. Open **Zen Idle Unloader** from the extensions menu. Choose **Settings** to set the timeout.
 
-The default is **30 minutes**. Checks run every minute; tabs get a fresh full timeout after browser startup. No browser restart is normally required to install.
+The default is **30 minutes**. Checks run every minute across all Zen spaces and browser windows, including inactive spaces; tabs get a fresh full timeout after browser startup or an extension update. No per-space installation or activation is needed. No browser restart is normally required to install.
 
 These two preferences allow experimental and unsigned add-ons, reducing Zen's normal add-on installation protections. The extension needs an experimental API to distinguish Essentials from ordinary pinned tabs. Experimental parent APIs have browser privileges. Inspect the source before installing; this build is not signed by Mozilla Add-ons.
 
